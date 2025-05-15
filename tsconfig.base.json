@@ -5,6 +5,12 @@
     "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "packages/*": [
+        "packages/*",
+      ]
+    },
     "lib": ["es2022"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
