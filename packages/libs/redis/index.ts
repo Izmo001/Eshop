@@ -1,10 +1,9 @@
 import Redis from "ioredis";
+/*Eslint-disable @typescript-eslint/no-non-null-assertion */
+console.log("Redis URI:", process.env.REDIS_DATABASE_URI);
+if (!process.env.REDIS_DATABASE_URI) {
+  throw new Error("REDIS_DATABASE_URI is not defined");
+}
+const redis = new Redis(process.env.REDIS_DATABASE_URI,);
 
-export const redis = new Redis({
-  host: process.env.REDIS_HOST || "127.0.0.1",
-    port: Number(process.env.REDIS_PORT) || 6379,
-    password: process.env.REDIS_PASSWORD || "",
-});
-
-
-
+export default redis;

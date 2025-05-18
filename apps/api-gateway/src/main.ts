@@ -3,7 +3,6 @@ import cors from "cors";
 import proxy from "express-http-proxy";
 import morgan from "morgan";
 import rateLimit from 'express-rate-limit';
-import swaggerUi from "swagger-ui-express";
 //import axios from "axios";
 import cookieparser from "cookie-parser";
 
@@ -33,11 +32,11 @@ app.set("trust proxy", 1);
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: (req: any) => (req.user ? 1000 : 100), // 1000 if authenticated, otherwise 100
+  max: (req: import('express').Request & { user?: unknown }) => (req.user ? 1000 : 100), // 1000 if authenticated, otherwise 100
   message: "Too many requests, please try again later.",
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: true,   // Enable the `X-RateLimit-*` headers (deprecated)
-  keyGenerator: (req: any) => req.ip, // Use IP address as the unique key
+  keyGenerator: (req: import('express').Request) => req.ip || 'unknown-ip', // Use IP address as the unique key, fallback if undefined
 });
 app.use(limiter);
 

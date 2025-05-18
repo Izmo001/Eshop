@@ -30,6 +30,5 @@ model Users {
   password  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  Avatar Images? // One-to-one relation (optional)
+  Avatar    Images? // One-to-one relation (optional)
 }
