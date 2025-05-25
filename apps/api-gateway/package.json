@@ -1,27 +1,41 @@
 {
-  "name": "@./api-gateway",
+  "name": "api-gateway",
   "version": "0.0.1",
   "private": true,
-  "nx": {
-    "targets": {
-      "serve": {
-        "continuous": true,
-        "executor": "@nx/js:node",
-        "defaultConfiguration": "development",
-        "dependsOn": [
-          "build"
-        ],
-        "options": {
-          "buildTarget": "@./api-gateway:build",
-          "runBuildTargetDependencies": false
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/api-gateway",
+        "main": "apps/api-gateway/src/main.ts",
+        "tsConfig": "apps/api-gateway/tsconfig.app.json",
+        "assets": ["apps/api-gateway/src/assets"]
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true
         },
-        "configurations": {
-          "development": {
-            "buildTarget": "@./api-gateway:build:development"
-          },
-          "production": {
-            "buildTarget": "@./api-gateway:build:production"
-          }
+        "production": {
+          "optimization": true,
+          "sourceMap": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "api-gateway:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "api-gateway:build:development"
+        },
+        "production": {
+          "buildTarget": "api-gateway:build:production"
         }
       }
     }

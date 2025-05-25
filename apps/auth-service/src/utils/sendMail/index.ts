@@ -49,7 +49,7 @@ export const sendEmail = async (
   try {
     const html = await renderEmailTemplate(templatename, data);
     const mailOptions = {
-      from: `${process.env.SMTP_FROM_NAME || 'Eshop'} <${process.env.SMTP_USER}>`,
+      from: `${process.env.SMTP_USER}`,
       to,
       subject,
       html,

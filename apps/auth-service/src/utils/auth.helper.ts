@@ -2,7 +2,8 @@ import crypto from 'crypto';
 import { validationError } from '@packages/error-handler';
 import redis from '@packages/libs/redis';
 import { sendEmail } from './sendMail';
-import { NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import prisma from '@packages/libs/prisma';
 
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,7 +41,7 @@ export const trackOtpRequest = async (email:string, next: NextFunction) => {
     await redis.set(OtpRequestKey, otpRequest + 1, "EX", 60);
 }
 
-export const sendOtp = async (name: string, email:string,tempalate:string )=> {
+export const sendOtp = async (name: string, email:string, tempalate:string )=> {
     const otp = crypto.randomInt(1000, 9999);
     await sendEmail( email, "verify your email", tempalate, {name,otp});
     await redis.set(`otp:${email}`, otp, "EX", 300);
@@ -68,3 +69,63 @@ export const verifyOtp = async (email:string, otp:string, next: NextFunction) =>
     // Delete OTP and failed attempts after successful verification
     await redis.del(`otp:${email}`, FailedAttemptsKey);
 };
+
+
+export const handleForgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  userType: "user" | "seller"
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return next(new validationError("Missing required field: email"));
+    }
+
+    // Lookup based on userType
+    let user: any = null;
+
+    if (userType === "user") {
+      user = await prisma.users.findUnique({ where: { email } });
+    } else if (userType === "seller") {
+      user = await prisma.users.findUnique({ where: { email } });
+    }
+
+    if (!user) {
+      return next(new validationError(`${userType} not found with this email`));
+    }
+
+    // OTP logic
+    await checkotpRestrictions(email, next);
+    await trackOtpRequest(email, next);
+    await sendOtp(user.name, email, "forgot_password");
+
+    return res.status(200).json({
+      message: "Password reset OTP sent to your email",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const verifyForgotPasswordotp = async ( 
+    req: Request, 
+    res: Response,
+    next: NextFunction,
+   // userType: "user" | "seller"
+    ) => {
+    try{
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            return next(new validationError("Missing required fields"));
+        }
+        await verifyOtp(email, otp, next);
+        res.status(200).json({
+            message: "OTP verified successfully",
+        });
+    }catch (error) {
+        return next(error);
+    }
+}

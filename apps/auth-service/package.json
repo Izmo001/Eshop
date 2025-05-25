@@ -1,33 +1,41 @@
 {
-  "name": "@./auth-service",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "dev": "node src/main.ts"
-  },
-  "nx":{
-    "name": "auth-service",
-    "ProjectType": "application",
-    "sourceRoot": "apps/auth-service/src",
-    "targets":{
-      "serve":{
-        "executor":"@nx/js:node",
-        "defaultConfiguration":"development",
-        "dependsOn":[
-          "build"
-        ],
-        "options":{
-          "buildTarget":"auth-service:build",
-          "runBuildTargetDependencies": false
+  "name": "auth-service",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/auth-service",
+        "main": "apps/auth-service/src/main.ts",
+        "tsConfig": "apps/auth-service/tsconfig.app.json",
+        "assets": ["apps/auth-service/src/assets"]
+      },
+      "configurations": {
+        "development": {
+          "sourceMap": true
         },
-        "configurations":{
-          "development":{"buildTarget": "auth-service:build:development"}
-        },
-        "production":{
-          "buildTarget":"auth-service:build:production"
+        "production": {
+          "optimization": true,
+          "sourceMap": false
         }
-
-      }  
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "auth-service:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "auth-service:build:development"
+        },
+        "production": {
+          "buildTarget": "auth-service:build:production"
+        }
+      }
     }
   }
 }
